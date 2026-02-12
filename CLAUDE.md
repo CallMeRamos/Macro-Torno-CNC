@@ -1,6 +1,6 @@
 # Macro Torno CNC
 
-Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCNC4M / ADTECH GNC5620). Sin build system; los archivos `.NC` se cargan directamente al controlador vía USB/serial.
+Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCNC4M / ADTECH CNC9620). Sin build system; los archivos `.NC` se cargan directamente al controlador vía USB/serial.
 
 ## Archivos del proyecto
 
@@ -10,6 +10,13 @@ Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCN
 | `T_FUNC (2).NC` | Función de cambio de herramienta (torreta 12 posiciones) |
 | `MACRO ADDRESS.xlsx` | Mapa de direcciones de variables macro |
 | `MACRO TRAINING.pdf` | Documentación de entrenamiento del controlador |
+| `image1.png` | Foto panel operador FCNC4M |
+| `image2.png` | Foto controlador ADTECH CNC9620 |
+
+## Hardware de referencia
+
+- **Panel operador FCNC4M** (`image1.png`): Botones START/PAUSE/E-stop, teclado numérico, selectores rotativos (OPERATION MODE, OVERRIDE TRAVERSE FEED, OVERRIDE SPINDLE)
+- **Controlador ADTECH CNC9620** (`image2.png`): Pantalla LCD, teclado alfanumérico, teclas F1-F6, puerto USB, botones MONITOR/PROG/PARA/COORD/DORUN
 
 ## Arquitectura de M_FUNC.NC
 
@@ -66,6 +73,80 @@ M3000
 | `#4120-#4121` | Parámetros de herramienta/torreta |
 | `#10035-#10036` | Registros de control (tool changer, refrigerante) |
 | `#11028` | Selector de idioma (0=inglés, 1=chino) |
+
+## Referencia de direcciones macro (del fabricante)
+
+Rangos completos del sheet "Macro Table" de `MACRO ADDRESS.xlsx`:
+
+| Rango | Tipo | Función |
+|-------|------|---------|
+| `#2000-#3088` | STR | Información de alarmas y G-code en ejecución |
+| `#3898-#3899` | INT16U | Registros de señales del sistema (safety, E-stop, MPG) |
+| `#3900-#3902` | INT32U | Conteo de piezas / cantidad máxima producción |
+| `#3904-#3905` | INT16U | Botones internos CNC / entrada de teclas externas |
+| `#3906` | INT8U | Modo actual (0=EDIT, 1=AUTO, 2=MANUAL, 3=STEP/MPG, 4=HOME) |
+| `#3907-#3916` | Mixed | Ratios de velocidad (interpolación, rapid, husillo, jog, programación, actual, manual) |
+| `#3918` | INT32U | Estado del husillo |
+| `#3930-#3947` | Mixed | Estado del sistema (alarma, running status, MPG, breakpoint, DNC) |
+| `#3950-#3998` | FLOAT | Control husillo (voltaje DA ch0/ch1, corriente trabajo) |
+| `#4000-#4010` | INT16U | Valores modales G-code (grupos 0-10) |
+| `#4050-#4065` | INT16U | Habilitación/inhibición movimiento por eje (X±, Y±, Z±, A±, B±, C±) |
+
+> **Nota de compatibilidad**: El Excel lista columnas para múltiples modelos: CNC4960, CNC4940, CNC4640(20), FCNC4M, FDK4A, FCNC6D. Las direcciones macro son compartidas entre la familia ADTECH.
+
+## Mapeo LED del panel
+
+Tabla del sheet "LED add." — mapeo `#1800-#1897` → función + OUT/M-code asociado:
+
+| Rango | Función | OUT/M-code |
+|-------|---------|------------|
+| `#1800-#1807` | Teclas menú F0-F7 | — |
+| `#1808` | Husillo FWD | OUT00 (M203) |
+| `#1809` | Husillo REV | OUT01 (M204) |
+| `#1810` | Refrigerante | OUT04 (M208/M209) |
+| `#1811` | Lubricación | OUT05 (M212/M213) |
+| `#1812-#1815` | Block skip, Single block, Pause, Start | — |
+| `#1816-#1819` | Home X, Y, Z, A | — |
+| `#1820-#1823` | Ready, Running, Stop, Alarm | — |
+| `#1843` | Panel F0 | OUT18 (M40/M41) |
+| `#1848` | Panel F1 | OUT19 (M42/M43) |
+| `#1849` | Chuck | OUT02 (M10/M11) |
+| `#1852` | Iluminación | OUT03 (M12/M13) |
+| `#1853` | Panel F2 | OUT20 (M44/M45) |
+| `#1854` | Soltar/apretar herramienta | OUT06 (M14/M15) |
+| `#1855` | Disco torreta (manual) | OUT07 (M16/M17) |
+| `#1856-#1857` | Torreta CW/CCW | OUT08-09 (M18-M21) |
+| `#1858` | Panel F3 | OUT21 (M46/M47) |
+| `#1860` | Soplado | OUT10 (M22/M23) |
+| `#1862` | Transportador viruta | OUT11 (M24/M25) |
+| `#1863` | Panel F4 | OUT22 (M48/M49) |
+| `#1874` | Panel F5 | OUT23 (M50/M51) |
+| `#1883-#1887` | Viruta2, Refri2, Soltar material, Expulsar, Alimentar | OUT12-16 |
+| `#1888` | Husillo stop | M205 |
+| `#1889` | Husillo posicionamiento | OUT17 (M38/M39) |
+| `#1890-#1897` | F6-F13 | OUT24-31 (M52-M67) |
+
+## Comandos #5111
+
+Interfaz de comandos del sistema vía escritura a `#5111`:
+
+| Valor | Comando |
+|-------|---------|
+| 1 | Crear archivo recibido de host |
+| 2-6 | Parámetros: backup/restore/import/export/reset |
+| 7 | Importar programa |
+| 8 | Comunicación USB |
+| 9 | Reinicio del sistema |
+| 10-11 | Tool probe: escanear / medir |
+| 12 | Encriptar archivo de mecanizado |
+| 13-14 | Macro variables: guardar / cargar |
+| 15-20 | Home por eje individual (X/Y/Z/A/B/C) |
+| 21-22 | Backup/restore FRAM |
+| 23-24 | Dual drive: cancelar / configurar |
+| 25 | Copiar recursos de USB a D:\ADT |
+| 26 | Home husillo servo |
+| 27 | Buscar señal tool setter |
+| 28-29 | Soft limits: activar / desactivar |
 
 ## Convenciones de código
 
