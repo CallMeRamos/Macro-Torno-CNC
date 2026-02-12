@@ -282,13 +282,11 @@ IF[#1 > #400]{
 #3=#1
 #1=#1*#2
 #1=#1+#3
-(Encender LEDs durante el cambio)
-#1811=1(LED lubricacion/tool ready ON)
+(Encender LED durante el cambio)
 #1855=1(LED disco torreta ON)
 (Ejecutar cambio de herramienta real)
 T#1
-(Apagar LEDs despues del cambio)
-#1811=0(LED lubricacion/tool ready OFF)
+(Apagar LED despues del cambio)
 #1855=0(LED disco torreta OFF)
 M3000
 %
@@ -320,13 +318,11 @@ IF[#1 > #400]{#1=1}
 #3=#1
 #1=#1*#2
 #1=#1+#3
-(Encender rele y LED durante el cambio)
-#1402=1(Rele torreta CW ON)
+(Encender LED durante el cambio)
 #1856=1(LED torreta CW ON)
 (Ejecutar cambio de herramienta real)
 T#1
-(Apagar rele y LED despues del cambio)
-#1402=0(Rele torreta CW OFF)
+(Apagar LED despues del cambio)
 #1856=0(LED torreta CW OFF)
 M3000
 %
@@ -356,13 +352,11 @@ IF[#1 < 1]{#1=#400}
 #3=#1
 #1=#1*#2
 #1=#1+#3
-(Encender rele y LED durante el cambio)
-#1403=1(Rele torreta CCW ON)
+(Encender LED durante el cambio)
 #1857=1(LED torreta CCW ON)
 (Ejecutar cambio de herramienta real)
 T#1
-(Apagar rele y LED despues del cambio)
-#1403=0(Rele torreta CCW OFF)
+(Apagar LED despues del cambio)
 #1857=0(LED torreta CCW OFF)
 M3000
 %
