@@ -15,7 +15,7 @@ IF [#11028==0] THEN #3000=1(T tool number error code)
 (#200 target tool , #4120 current tool)
 #1422=1 (Brake release)
 #1423=1 (Turret unclamp)
-G4X1
+G4P200
 M88P23L0Q5000 (Unclamp checking)
 M88P21L1Q5000 (Unclamp checking)
 M88P22L1Q5000 (Brake release checking)
@@ -65,7 +65,7 @@ END88
 #1423=0 (Turret clamp)
 #1423=1 (Turret clamp)
 #1423=0 (Turret clamp)
-G04 P700 (delay 200 ms)
+G04 P200 (delay 200 ms)
 #1422=0 (Brake OFF)
 
 M88P23L0Q5000 (clamp checking)
