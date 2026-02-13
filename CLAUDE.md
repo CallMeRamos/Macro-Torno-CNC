@@ -185,6 +185,28 @@ El archivo `nc_res.ncp` (carpeta `D:\ADT` del controlador) contiene la tabla de 
 | `MotionErrScram` | `MotionErrEmerg` | 14 |
 | `SCRAM33` | `EMERG33` | 7 |
 
+### Traducciones File Manager y diálogos (español)
+
+13 traducciones (20 reemplazos) de textos del file manager, dispositivos y diálogos:
+
+| Original | Traducción | Bytes |
+|----------|-----------|-------|
+| `FileLoad Success!` | `Archivo Cargado!!` | 17 |
+| `load G code file?` | `Cargar archivo G?` | 17 |
+| `My Devices` | `Mi Equipo ` | 10 |
+| `local disk(c)` | `disco loc.(c)` | 13 |
+| `local disk(d)` | `disco loc.(d)` | 13 |
+| `data traveler(U)` | `Memoria USB  (U)` | 16 |
+| `Disk(D:)` | `Disco D:` | 8 |
+| `Save As` | `Guardar` | 7 |
+| `Paste` (standalone) | `Pegar` | 5 |
+| `Teach` (standalone) | `Captu` | 5 |
+| `Devices` (standalone) | `Dispos.` | 7 |
+| `confirm` (standalone) | `aceptar` | 7 |
+| `cancel` (standalone) | `anular` | 6 |
+
+Textos de 3-4 bytes (Cut, Copy, New, File, Edit) se dejaron en inglés por ser universales.
+
 ### Método de personalización
 - Reemplazo byte-por-byte (misma longitud exacta) para no alterar la estructura
 - Solo se modifica el texto inglés — el texto chino queda intacto
