@@ -27,6 +27,10 @@
 (  #10036 = Puerto asignado a refrigerante              )
 (  #1012  = Entrada IN12 - bloqueo externo chuck        )
 (  #1004  = Entrada IN04 - sensor chuck (0=abierto, 1=cerrado) )
+(  #150   = Pagina actual F0-F4 (1, 2 o 3)             )
+(  #151   = Herramienta destino calculada               )
+(  #152   = Multiplicador T-word (100 o 10)             )
+(  #154   = Herramienta actual extraida de #4120        )
 (                                                       )
 (========================================================)
 (                                                       )
@@ -91,17 +95,22 @@
 (  O204  | Toggle husillo giro CCW   | M204             )
 (  O205  | Husillo parada total      | M205             )
 (                                                       )
-(  ===== BOTONES DE FUNCION DEL PANEL =====             )
-(  O0052 | Boton F0 ON  INHABILITADO  | M40 OUT18        )
-(  O0053 | Boton F0 OFF INHABILITADO  | M41 OUT18        )
-(  O0054 | Boton F1 ON  INHABILITADO  | M42 OUT19        )
-(  O0055 | Boton F1 OFF INHABILITADO  | M43 OUT19        )
-(  O0056 | Boton F2 ON  INHABILITADO  | M44 OUT20        )
-(  O0057 | Boton F2 OFF INHABILITADO  | M45 OUT20        )
-(  O0046 | Boton F3 ON  INHABILITADO  | M46 OUT21        )
-(  O0047 | Boton F3 OFF INHABILITADO  | M47 OUT21        )
-(  O0048 | Boton F4 ON  INHABILITADO  | M48 OUT22        )
-(  O0049 | Boton F4 OFF INHABILITADO  | M49 OUT22        )
+(  ===== BOTONES F0-F4: CAMBIO DIRECTO DE HERRAMIENTA = )
+(  Sistema de paginas: F0=ciclar pagina, F1-F4=herram.  )
+(  Pag 1: F1=T1  F2=T2  F3=T3  F4=T4                  )
+(  Pag 2: F1=T5  F2=T6  F3=T7  F4=T8                  )
+(  Pag 3: F1=T9  F2=T10 F3=T11 F4=T12                 )
+(  Variables: #150=pagina #151=destino #152=mult #154=actual)
+(  O0052 | F0 ON  Ciclar pagina 1-2-3 | LEDs progreso   )
+(  O0053 | F0 OFF Sin accion          |                  )
+(  O0054 | F1 ON  Herramienta pos 1   | T1/T5/T9        )
+(  O0055 | F1 OFF Sin accion          |                  )
+(  O0056 | F2 ON  Herramienta pos 2   | T2/T6/T10       )
+(  O0057 | F2 OFF Sin accion          |                  )
+(  O0046 | F3 ON  Herramienta pos 3   | T3/T7/T11       )
+(  O0047 | F3 OFF Sin accion          |                  )
+(  O0048 | F4 ON  Herramienta pos 4   | T4/T8/T12       )
+(  O0049 | F4 OFF Sin accion          |                  )
 (  O0050 | Boton F5 ON               | M50 OUT23        )
 (  O0051 | Boton F5 OFF              | M51 OUT23        )
 (  O0058 | Boton F9 ON               | M58 OUT27        )
@@ -616,54 +625,233 @@ M3000
 (********************************************************)
 (*                                                      *)
 (*   SECCION 10: BOTONES DE FUNCION DEL PANEL           *)
-(*   F0-F5 y F9-F13                                     *)
-(*   Cada boton tiene ON par y OFF impar                *)
-(*   Activan/desactivan rele #14xx y LED #18xx          *)
+(*   F0-F4: Cambio directo de herramienta por paginas   *)
+(*     F0 = Ciclar pagina (flash LED N veces)           *)
+(*     F1-F4 = Seleccionar herramienta segun pagina     *)
+(*     Pag 1: F1=T1  F2=T2  F3=T3  F4=T4              *)
+(*     Pag 2: F1=T5  F2=T6  F3=T7  F4=T8              *)
+(*     Pag 3: F1=T9  F2=T10 F3=T11 F4=T12             *)
+(*   REGLA: ON y OFF duplicados, solo LED propio        *)
+(*   F5 y F9-F13: Funciones originales                  *)
 (*                                                      *)
 (********************************************************)
 
 O0052
-(BOTON F0 ON - INHABILITADO)
+(BOTON F0 ON - CICLAR PAGINA HERRAMIENTAS)
+(Flash LED F0: N veces = numero de pagina)
+(REGLA: solo tocar LED propio #1843, nunca LEDs de otros botones)
+IF[#150<1]{#150=0}
+#150=#150+1
+IF[#150>3]{#150=1}
+(Flash LED F0: N veces = pagina N)
+#1=0
+WHILE[#1<#150]DO1
+#1843=1
+G4P200
+#1843=0
+G4P200
+#1=#1+1
+END1
 M3000
 %
 O0053
-(BOTON F0 OFF - INHABILITADO)
+(BOTON F0 OFF - CICLAR PAGINA HERRAMIENTAS)
+(Duplicado de O0052 por despacho LED ON/OFF del controlador)
+IF[#150<1]{#150=0}
+#150=#150+1
+IF[#150>3]{#150=1}
+#1=0
+WHILE[#1<#150]DO1
+#1843=1
+G4P200
+#1843=0
+G4P200
+#1=#1+1
+END1
 M3000
 %
 
 O0054
-(BOTON F1 ON - INHABILITADO)
+(BOTON F1 ON - HERRAMIENTA POSICION 1: T1/T5/T9)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+1
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1848=1(LED F1 ON durante cambio)
+T#1
+#1848=0(LED F1 OFF al terminar)
 M3000
 %
 O0055
-(BOTON F1 OFF - INHABILITADO)
+(BOTON F1 OFF - HERRAMIENTA POSICION 1: T1/T5/T9)
+(Duplicado de O0054 por despacho LED ON/OFF del controlador)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+1
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1848=1(LED F1 ON durante cambio)
+T#1
+#1848=0(LED F1 OFF al terminar)
 M3000
 %
 
 O0056
-(BOTON F2 ON - INHABILITADO)
+(BOTON F2 ON - HERRAMIENTA POSICION 2: T2/T6/T10)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+2
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1853=1(LED F2 ON durante cambio)
+T#1
+#1853=0(LED F2 OFF al terminar)
 M3000
 %
 O0057
-(BOTON F2 OFF - INHABILITADO)
+(BOTON F2 OFF - HERRAMIENTA POSICION 2: T2/T6/T10)
+(Duplicado de O0056 por despacho LED ON/OFF del controlador)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+2
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1853=1(LED F2 ON durante cambio)
+T#1
+#1853=0(LED F2 OFF al terminar)
 M3000
 %
 
 O0046
-(BOTON F3 ON - INHABILITADO)
+(BOTON F3 ON - HERRAMIENTA POSICION 3: T3/T7/T11)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+3
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1858=1(LED F3 ON durante cambio)
+T#1
+#1858=0(LED F3 OFF al terminar)
 M3000
 %
 O0047
-(BOTON F3 OFF - INHABILITADO)
+(BOTON F3 OFF - HERRAMIENTA POSICION 3: T3/T7/T11)
+(Duplicado de O0046 por despacho LED ON/OFF del controlador)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+3
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1858=1(LED F3 ON durante cambio)
+T#1
+#1858=0(LED F3 OFF al terminar)
 M3000
 %
 
 O0048
-(BOTON F4 ON - INHABILITADO)
+(BOTON F4 ON - HERRAMIENTA POSICION 4: T4/T8/T12)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+4
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1863=1(LED F4 ON durante cambio)
+T#1
+#1863=0(LED F4 OFF al terminar)
 M3000
 %
 O0049
-(BOTON F4 OFF - INHABILITADO)
+(BOTON F4 OFF - HERRAMIENTA POSICION 4: T4/T8/T12)
+(Duplicado de O0048 por despacho LED ON/OFF del controlador)
+IF[#3906!=2]M3000(Solo en modo manual)
+IF[#3918!=0]{#3000=1(PARAR HUSILLO ANTES DE CAMBIAR HERRAMIENTA)}
+IF[#150<1]{#150=1}
+IF[#150>3]{#150=1}
+#151=[#150-1]*4+4
+IF[#151>#400]{#3000=1(HERRAMIENTA FUERA DE RANGO)}
+#152=100
+IF[#4121==2]{#152=100}
+IF[#4121==1]{#152=10}
+#154=FIX[#4120/#152]
+IF[#154==#151]M3000(Ya esta en esa herramienta)
+#1=#151
+#3=#1
+#1=#1*#152
+#1=#1+#3
+#1863=1(LED F4 ON durante cambio)
+T#1
+#1863=0(LED F4 OFF al terminar)
 M3000
 %
 

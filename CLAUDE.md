@@ -33,7 +33,7 @@ Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCN
 | O0010-O0011 | Chuck husillo (M10/M11) |
 | O0012-O0039 | Relés de salida OUT03-OUT16 |
 | O0041-O0044 | Rotación husillo (M03/M04) |
-| O0046-O0067 | Botones de función F0-F13 (F0-F4 INHABILITADOS) |
+| O0046-O0067 | Botones de función F0-F13 (F0-F4 = cambio directo herramienta) |
 | O0068-O0101 | Relés extendidos OUT32-OUT47 |
 | O203-O213 | Control de sistema (husillo start/stop, refrigerante, tool ready) |
 | O2012 | Toggle husillo condicional |
@@ -50,6 +50,54 @@ M3000
 %
 ```
 
+### Sistema F0-F4: Cambio directo de herramienta por páginas
+
+Los botones F0-F4 del panel implementan un sistema de selección rápida de herramienta mediante 3 páginas:
+
+| Botón | Página 1 | Página 2 | Página 3 |
+|-------|----------|----------|----------|
+| F1    | **T1**   | **T5**   | **T9**   |
+| F2    | **T2**   | **T6**   | **T10**  |
+| F3    | **T3**   | **T7**   | **T11**  |
+| F4    | **T4**   | **T8**   | **T12**  |
+
+- **F0** = Cicla página 1→2→3→1
+- **F1-F4** = Selecciona herramienta según página actual
+- Fórmula: `herramienta = (página-1)*4 + posición_botón`
+- Máximo 2 pulsaciones para cualquier herramienta
+
+**Despacho LED ON/OFF del controlador ADTECH:**
+
+El controlador despacha botones de panel según el estado del LED:
+- **LED OFF + presionar** → llama macro ON (O-code par)
+- **LED ON + presionar** → llama macro OFF (O-code impar)
+
+Por esto, **cada macro ON tiene un duplicado idéntico en su macro OFF** (O0052=O0053, O0054=O0055, etc.), y **cada macro solo toca el LED de su propio botón** para evitar conflictos de despacho.
+
+**Indicación de página (flash LED F0):**
+
+F0 flashea su propio LED N veces para indicar la página actual:
+- Página 1: 1 flash
+- Página 2: 2 flashes
+- Página 3: 3 flashes
+
+Cada flash = 200ms ON + 200ms OFF.
+
+**Variables utilizadas:**
+
+| Variable | Propósito |
+|----------|-----------|
+| `#150`   | Número de página actual (1, 2 o 3) |
+| `#151`   | Herramienta destino calculada |
+| `#152`   | Multiplicador T-word (100 o 10 según `#4121`) |
+| `#154`   | Herramienta actual extraída de `#4120` |
+
+**Verificaciones de seguridad (F1-F4):**
+1. Solo funciona en modo MANUAL (`#3906==2`)
+2. Husillo debe estar detenido (`#3918==0`)
+3. Herramienta dentro de rango (`#151<=#400`)
+4. Skip si ya está en la herramienta destino
+
 ## Arquitectura de T_FUNC (2).NC
 
 ~210 líneas, programa O0001. Torreta de 12 posiciones con optimización de ruta CW/CCW.
@@ -65,6 +113,10 @@ M3000
 |----------|-----|
 | `#1-#33` | Variables locales temporales |
 | `#100-#200` | Parámetros de propósito general |
+| `#150`   | Página actual botones F0-F4 (1, 2 o 3) |
+| `#151`   | Herramienta destino calculada (F1-F4) |
+| `#152`   | Multiplicador T-word (100 o 10) |
+| `#154`   | Herramienta actual extraída de `#4120` |
 | `#400` | Número máximo de herramientas |
 | `#1004` | Sensor chuck (IN04): 0=abierto, 1=cerrado (sensor NC invertido). Param 031=**4** |
 | `#1005-#1008` | Entradas sensores BCD torreta (IN5-IN8) |
