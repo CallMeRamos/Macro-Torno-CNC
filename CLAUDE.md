@@ -12,6 +12,8 @@ Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCN
 | `MACRO TRAINING.pdf` | Documentación de entrenamiento del controlador |
 | `image1.png` | Foto panel operador FCNC4M |
 | `image2.png` | Foto controlador ADTECH CNC9620 |
+| `nc_res.ncp` | Archivo de recursos de texto del firmware (tabla bilingüe chino/inglés) — **modificado** |
+| `nc_res.ncp.bak` | Respaldo del nc_res.ncp original (sin modificar) |
 
 ## Hardware de referencia
 
@@ -63,6 +65,7 @@ M3000
 | `#1-#33` | Variables locales temporales |
 | `#100-#200` | Parámetros de propósito general |
 | `#400` | Número máximo de herramientas |
+| `#1004` | Sensor chuck (IN04): 0=abierto, 1=cerrado (sensor NC invertido). Param 031=**4** |
 | `#1005-#1008` | Entradas sensores BCD torreta (IN5-IN8) |
 | `#1400-#1450` | Flags de estado de salidas (relés) |
 | `#1800-#1900` | Estados extendidos e indicadores LED |
@@ -147,6 +150,33 @@ Interfaz de comandos del sistema vía escritura a `#5111`:
 | 26 | Home husillo servo |
 | 27 | Buscar señal tool setter |
 | 28-29 | Soft limits: activar / desactivar |
+
+## Personalización de textos del firmware (nc_res.ncp)
+
+El archivo `nc_res.ncp` (carpeta `D:\ADT` del controlador) contiene la tabla de textos bilingüe que el firmware muestra en pantalla.
+
+### Estructura de cada entrada
+```
+[Texto chino UTF-8] 0x09 0x3A [Texto inglés ASCII] 0x0D 0x0A
+                     TAB  ':'                       CR   LF
+```
+
+### Textos personalizados
+
+| Original | Personalizado | Param | Contexto |
+|----------|--------------|-------|----------|
+| `Safe Single Valid` | `CHUCK ABIERTO!!!!` | Param 029 = `4` (IN04) | Se muestra cuando chuck abierto + START |
+
+### Método de personalización
+- Reemplazo byte-por-byte (misma longitud exacta) para no alterar la estructura
+- Solo se modifica el texto inglés — el texto chino queda intacto
+- Respaldo siempre en `nc_res.ncp.bak`
+- Para aplicar: copiar `nc_res.ncp` a USB → File Manager del controlador → pegar en `D:\ADT` → reiniciar
+
+### Param 029 — Safe Signal Check Input
+- Valor: **`4`** → usa IN04 (sensor de chuck) como señal de seguridad
+- Firmware bloquea START cuando IN04=0 (chuck abierto)
+- Mensaje original: "Safe Single Valid" → ahora: **"CHUCK ABIERTO!!!!"**
 
 ## Convenciones de código
 

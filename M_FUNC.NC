@@ -26,6 +26,7 @@
 (  #10035 = Puerto asignado a lubricacion               )
 (  #10036 = Puerto asignado a refrigerante              )
 (  #1012  = Entrada IN12 - bloqueo externo chuck        )
+(  #1004  = Entrada IN04 - sensor chuck (0=abierto, 1=cerrado) )
 (                                                       )
 (========================================================)
 (                                                       )
@@ -47,6 +48,7 @@
 (  O0010 | Chuck cerrar - clamp      | M10              )
 (  O0011 | Chuck abrir - unclamp     | M11              )
 (  O2012 | Toggle chuck condicional  | Seguridad        )
+(  O0100 | Verif. chuck cerrado       | M100 Seguridad  )
 (                                                       )
 (  ===== ILUMINACION Y HERRAMIENTA =====                )
 (  O0012 | Iluminacion ON            | M12 OUT03        )
@@ -129,7 +131,7 @@
 (  O0094/O0095 | Rele OUT44 ON/OFF                      )
 (  O0096/O0097 | Rele OUT45 ON/OFF                      )
 (  O0198/O0199 | Rele OUT46 ON/OFF                      )
-(  O0100/O0101 | Rele OUT47 ON/OFF                      )
+(  O0100 | Verif. chuck cerrado (M100)                   )
 (                                                       )
 (  ===== TOGGLES DE ESTADO =====                        )
 (  O3001-O3020 | Toggle variables #1926-#1945           )
@@ -939,13 +941,11 @@ M3000
 %
 
 O0100
-(RELE EXTENDIDO OUT47 ON)
-#1447=1
-M3000
-%
-O0101
-(RELE EXTENDIDO OUT47 OFF)
-#1447=0
+(VERIFICACION CHUCK CERRADO - SEGURIDAD PRE-INICIO M100)
+(IN04=#1004: 0=chuck abierto, 1=chuck cerrado)
+IF[#1004==0]{
+#3000=1(CHUCK ABIERTO - CERRAR CHUCK)
+}
 M3000
 %
 
@@ -971,6 +971,7 @@ O203
 IF[#3906!=2]M3000(Si no es modo automatico, salir)
 IF[#3918==0](Si husillo esta detenido)
 {
+IF[#1004==0]{#3000=1(CHUCK ABIERTO)}
  M03S#4118(Arrancar husillo CW a velocidad actual)
 #1808=1(LED husillo FWD ON)
 }
@@ -986,6 +987,7 @@ O204
 IF[#3906!=2]M3000(Si no es modo automatico, salir)
 IF[#3918==0](Si husillo esta detenido)
 {
+IF[#1004==0]{#3000=1(CHUCK ABIERTO)}
  M04S#4118(Arrancar husillo CCW a velocidad actual)
 #1809=1(LED husillo REV ON)
 }
@@ -1387,7 +1389,8 @@ ELSE
 M3000
 %
 
+
 (========================================================)
 (  FIN DE M_FUNC.NC                                     )
-(  Total: 56 subprogramas en 15 secciones               )
+(  Total: 57 subprogramas en 16 secciones               )
 (========================================================)
