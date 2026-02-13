@@ -92,16 +92,16 @@
 (  O205  | Husillo parada total      | M205             )
 (                                                       )
 (  ===== BOTONES DE FUNCION DEL PANEL =====             )
-(  O0052 | Boton F0 ON               | M40 OUT18        )
-(  O0053 | Boton F0 OFF              | M41 OUT18        )
-(  O0054 | Boton F1 ON               | M42 OUT19        )
-(  O0055 | Boton F1 OFF              | M43 OUT19        )
-(  O0056 | Boton F2 ON               | M44 OUT20        )
-(  O0057 | Boton F2 OFF              | M45 OUT20        )
-(  O0046 | Boton F3 ON               | M46 OUT21        )
-(  O0047 | Boton F3 OFF              | M47 OUT21        )
-(  O0048 | Boton F4 ON               | M48 OUT22        )
-(  O0049 | Boton F4 OFF              | M49 OUT22        )
+(  O0052 | Boton F0 ON  INHABILITADO  | M40 OUT18        )
+(  O0053 | Boton F0 OFF INHABILITADO  | M41 OUT18        )
+(  O0054 | Boton F1 ON  INHABILITADO  | M42 OUT19        )
+(  O0055 | Boton F1 OFF INHABILITADO  | M43 OUT19        )
+(  O0056 | Boton F2 ON  INHABILITADO  | M44 OUT20        )
+(  O0057 | Boton F2 OFF INHABILITADO  | M45 OUT20        )
+(  O0046 | Boton F3 ON  INHABILITADO  | M46 OUT21        )
+(  O0047 | Boton F3 OFF INHABILITADO  | M47 OUT21        )
+(  O0048 | Boton F4 ON  INHABILITADO  | M48 OUT22        )
+(  O0049 | Boton F4 OFF INHABILITADO  | M49 OUT22        )
 (  O0050 | Boton F5 ON               | M50 OUT23        )
 (  O0051 | Boton F5 OFF              | M51 OUT23        )
 (  O0058 | Boton F9 ON               | M58 OUT27        )
@@ -623,67 +623,47 @@ M3000
 (********************************************************)
 
 O0052
-(BOTON F0 ON - M40 - OUT18)
-#1418=1(Rele F0 ON)
-#1843=1(LED F0 ON)
+(BOTON F0 ON - INHABILITADO)
 M3000
 %
 O0053
-(BOTON F0 OFF - M41 - OUT18)
-#1418=0(Rele F0 OFF)
-#1843=0(LED F0 OFF)
+(BOTON F0 OFF - INHABILITADO)
 M3000
 %
 
 O0054
-(BOTON F1 ON - M42 - OUT19)
-#1419=1(Rele F1 ON)
-#1848=1(LED F1 ON)
+(BOTON F1 ON - INHABILITADO)
 M3000
 %
 O0055
-(BOTON F1 OFF - M43 - OUT19)
-#1419=0(Rele F1 OFF)
-#1848=0(LED F1 OFF)
+(BOTON F1 OFF - INHABILITADO)
 M3000
 %
 
 O0056
-(BOTON F2 ON - M44 - OUT20)
-#1420=1(Rele F2 ON)
-#1853=1(LED F2 ON)
+(BOTON F2 ON - INHABILITADO)
 M3000
 %
 O0057
-(BOTON F2 OFF - M45 - OUT20)
-#1420=0(Rele F2 OFF)
-#1853=0(LED F2 OFF)
+(BOTON F2 OFF - INHABILITADO)
 M3000
 %
 
 O0046
-(BOTON F3 ON - M46 - OUT21)
-#1421=1(Rele F3 ON)
-#1858=1(LED F3 ON)
+(BOTON F3 ON - INHABILITADO)
 M3000
 %
 O0047
-(BOTON F3 OFF - M47 - OUT21)
-#1421=0(Rele F3 OFF)
-#1858=0(LED F3 OFF)
+(BOTON F3 OFF - INHABILITADO)
 M3000
 %
 
 O0048
-(BOTON F4 ON - M48 - OUT22)
-#1422=1(Rele F4 ON)
-#1863=1(LED F4 ON)
+(BOTON F4 ON - INHABILITADO)
 M3000
 %
 O0049
-(BOTON F4 OFF - M49 - OUT22)
-#1422=0(Rele F4 OFF)
-#1863=0(LED F4 OFF)
+(BOTON F4 OFF - INHABILITADO)
 M3000
 %
 

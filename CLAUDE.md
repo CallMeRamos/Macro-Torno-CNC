@@ -14,6 +14,7 @@ Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCN
 | `image2.png` | Foto controlador ADTECH CNC9620 |
 | `nc_res.ncp` | Archivo de recursos de texto del firmware (tabla bilingüe chino/inglés) — **modificado** |
 | `nc_res.ncp.bak` | Respaldo del nc_res.ncp original (sin modificar) |
+| `NC_RES_CATALOGO.md` | Catálogo completo de 2,212 textos personalizables del firmware (15 categorías, índice por bytes) |
 
 ## Hardware de referencia
 
@@ -32,7 +33,7 @@ Biblioteca de macros G-Code para torno CNC con controlador FANUC-compatible (FCN
 | O0010-O0011 | Chuck husillo (M10/M11) |
 | O0012-O0039 | Relés de salida OUT03-OUT16 |
 | O0041-O0044 | Rotación husillo (M03/M04) |
-| O0046-O0067 | Botones de función F0-F13 |
+| O0046-O0067 | Botones de función F0-F13 (F0-F4 INHABILITADOS) |
 | O0068-O0101 | Relés extendidos OUT32-OUT47 |
 | O203-O213 | Control de sistema (husillo start/stop, refrigerante, tool ready) |
 | O2012 | Toggle husillo condicional |
@@ -166,6 +167,23 @@ El archivo `nc_res.ncp` (carpeta `D:\ADT` del controlador) contiene la tabla de 
 | Original | Personalizado | Param | Contexto |
 |----------|--------------|-------|----------|
 | `Safe Single Valid` | `CHUCK ABIERTO!!!!` | Param 029 = `4` (IN04) | Se muestra cuando chuck abierto + START |
+| `System [Reset] Exit` | `PULSE RESET!!!!!!!!` | Alarma 0052 | Indica al operador que presione RESET para salir |
+
+### Traducciones SCRAM → EMERG (parada de emergencia)
+
+9 textos traducidos de "SCRAM" a "EMERG" para mayor claridad del operador hispanohablante:
+
+| Original | Traducción | Bytes |
+|----------|-----------|-------|
+| `035,ExScram2 Check Input` | `035,EmergExt2 NumEntrada` | 24 |
+| `SCRAM` (aislado) | `EMERG` | 5 |
+| `Scram I61` | `Emerg I61` | 9 |
+| `075,SCRAM` | `075,EMERG` | 9 |
+| `ScramTheNot` | `EmergInvert` | 11 |
+| `088, Handwheel scram` | `088, Emerg. Volante ` | 20 |
+| `SCRAM64` | `EMERG64` | 7 |
+| `MotionErrScram` | `MotionErrEmerg` | 14 |
+| `SCRAM33` | `EMERG33` | 7 |
 
 ### Método de personalización
 - Reemplazo byte-por-byte (misma longitud exacta) para no alterar la estructura
